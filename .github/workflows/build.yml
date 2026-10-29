@@ -1,0 +1,43 @@
+name: Build Dilbar Live APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Download Code from Google Drive
+      run: |
+        pip install gdown
+        gdown --fuzzy "1Ckau8bzyCpxWDzizo19d8fGap2VeVU89" -O project.zip
+        mkdir -p temp_extracted
+        unzip -q project.zip -d temp_extracted/
+        if [ -d "temp_extracted/app" ]; then
+          cp -r temp_extracted/* .
+        else
+          ROOT_DIR=$(find temp_extracted -name "gradlew" -exec dirname {} \;)
+          cp -r $ROOT_DIR/* .
+        fi
+        chmod +x gradlew || true
+
+    - name: Set up Java 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Build APK with Gradle
+      run: ./gradlew assembleDebug --stacktrace
+
+    - name: Upload Dilbar Live APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: DilbarLive-Official-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
