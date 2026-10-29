@@ -15,10 +15,10 @@ jobs:
 
     - name: Download Code from Google Drive
       run: |
-        pip install gdown
+        pip install gdown --break-system-packages
         gdown --fuzzy "1Ckau8bzyCpxWDzizo19d8fGap2VeVU89" -O project.zip
         mkdir -p temp_extracted
-        unzip -q project.zip -d temp_extracted/
+        unzip -q project.zip -d temp_extracted/ || unzip project.zip -d temp_extracted/
         if [ -d "temp_extracted/app" ]; then
           cp -r temp_extracted/* .
         else
